@@ -22,16 +22,16 @@ namespace Web_Proxy
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            //监测客户端电脑
+            //检测客户端是否注册
+
 
             #region  重新注册
-
             //读取配置文件
             _config = _manager.Config.Read();
             if (_config == null)
             {
                 //自动注册
-                var result = new ClientService().AutoRegister(ApplicationUnit.Client);
+                var result = new ClientService().Register(ApplicationUnit.Client);
                 if (result.IsSuccess())
                 {
                     //注册成功                   
@@ -42,40 +42,36 @@ namespace Web_Proxy
                     _config.Version = ApplicationUnit.Client.Version;
                     _config.VersionNo = ApplicationUnit.Client.VersionNo.Value;
                     _config.LocalVersionNo = ApplicationUnit.Client.VersionNo.Value;
-                    _config.IPs = ApplicationUnit.Client.IP;
+                    _config.Ip = ApplicationUnit.Client.IP;
 
                     if (_manager.Config.Write(_config))
                     {
-                        MessageBox.Show("注册成功");
-                        //重启Web服务
-                        ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);
+                        Logger.WriteTrace("自动注册成功");
                     }
                 }
                 else
                 {
-                    MessageBox.Show(result.Message);
-                    ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);
+                    Logger.WriteError("自动注册失败：" + result.Message);
                 }
             }
             else
             {
-                if (ApplicationUnit.Client.IP != _config.IPs)
+                if (ApplicationUnit.Client.IP != _config.Ip)
                 {
                     // 1，修改数据库ip
-                    var result = new ClientService().ModifyClientIPs(ApplicationUnit.Client);                    
-                    if(result.IsSuccess())
+                    var result = new ClientService().ModifyClientIp(ApplicationUnit.Client);
+                    if (result.IsSuccess())
                     {
                         //2，修改本地配置
-                        if (result.Data==null)
+                        if (result.Data == null)
                         {
-                            _config.IPs = ApplicationUnit.Client.IP;
+                            _config.Ip = ApplicationUnit.Client.IP;
                             if (_manager.Config.Write(_config))
                             {
-                                MessageBox.Show("注册成功");
-                                //重启Web服务
-                                ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);
+                                Logger.WriteTrace("自动注册成功");
                             }
-                        }else
+                        }
+                        else
                         {
                             _config.Token = result.Data.ToString();
                             _config.BaseApi = new ClientService().Config;
@@ -84,25 +80,22 @@ namespace Web_Proxy
                             _config.Version = ApplicationUnit.Client.Version;
                             _config.VersionNo = ApplicationUnit.Client.VersionNo.Value;
                             _config.LocalVersionNo = ApplicationUnit.Client.VersionNo.Value;
-                            _config.IPs = ApplicationUnit.Client.IP;
+                            _config.Ip = ApplicationUnit.Client.IP;
 
                             if (_manager.Config.Write(_config))
                             {
-                                MessageBox.Show("注册成功");
-                                //重启Web服务
-                                ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);
+                                Logger.WriteTrace("自动注册成功");
                             }
                         }
                     }
                     else
                     {
-                        MessageBox.Show(result.Message);
-                        ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);
+                        Logger.WriteError("自动注册失败：" + result.Message);
                     }
 
                     ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);
-                }
 
+                }
             }
 
             #endregion

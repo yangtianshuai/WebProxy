@@ -21,7 +21,7 @@
         /// <summary>
         /// 客户端ip列表（多网卡有可能是多个ip）
         /// </summary>
-        public string IPs { get; set;}
+        public string Ip { get; set;}
         
     }
 }

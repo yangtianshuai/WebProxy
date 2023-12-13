@@ -53,9 +53,7 @@ namespace Web_Proxy.Service
             return GetResult(response);
         }
 
-        //ModifyClientIPs
-
-        public ResponseResult2 ModifyClientIPs(ClientRegisterModel model)
+        public ResponseResult2 ModifyClientIp(ClientRegisterModel model)
         {
             var response = new HttpHelper().Post($@"{this.BaseUrl}/api/client/ModifyClientIPs"
                 , JsonConvert.SerializeObject(model), (request) =>
