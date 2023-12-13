@@ -2,6 +2,7 @@
 {
     public class ClientRegisterModel
     {        
+        public string Token { get; set; }
         /// <summary>
         /// IP地址
         /// </summary>
