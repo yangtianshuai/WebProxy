@@ -82,6 +82,12 @@ namespace Web_Proxy
 
                 //加载本地API --（参数：获取当前运行的程序集中,定义的所有的类型)          
                 ApiRoute.Load(Assembly.GetExecutingAssembly().GetTypes());
+
+                if (FireWallHelper.GetRule("Web-Proxy", "TCP") == null)
+                {
+                    //加入防火墙入栈规则
+                    FireWallHelper.AddRule("Web-Proxy", ApplicationUnit.Client.Port, "TCP");
+                }                
             }
             catch (Exception ex)
             {
