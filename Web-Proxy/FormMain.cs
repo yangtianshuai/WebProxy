@@ -26,12 +26,12 @@ namespace Web_Proxy
             ApplicationUnit.Client.Token = _config?.Token;
 
             //检测客户端是否注册
-            if (FireWallHelper.GetRule("Web-Proxy", "TCP") == null)
+            if (RegistryUtility.ExistConfig())
             {
-                //加入防火墙入栈规则
-                FireWallHelper.AddRule("Web-Proxy", ApplicationUnit.Client.Port, "TCP");
-               
-                if(_config.Ip != ApplicationUnit.Client.IP)
+                //保存本地端口配置
+                RegistryUtility.RegistryPort(ApplicationUnit.Client.Port);
+
+                if (_config?.Ip != ApplicationUnit.Client.IP)
                 {
                     //不同计算机拷贝
                     ApplicationUnit.Client.Token = null;

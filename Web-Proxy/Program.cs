@@ -1,7 +1,5 @@
-﻿using Microsoft.Win32;
-using Proxy.Common;
+﻿using Proxy.Common;
 using System;
-using System.Diagnostics;
 using System.HttpProxy;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -63,9 +61,8 @@ namespace Web_Proxy
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            //RegistMedical();//注册
             //开机启动
-            AutoStart();
+            RegistryUtility.AutoStart();
 
             //添加过滤器
             FilterCollection.Add(new ApiFilter());
@@ -75,7 +72,7 @@ namespace Web_Proxy
                 ApplicationUnit.Server = new HttpServer();
 
                 //开启Web服务
-                ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);
+                ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);                
 
                 //开启WebSocket
                 WebSocket.Current.Start(ApplicationUnit.Client.Port + 1);
@@ -110,43 +107,7 @@ namespace Web_Proxy
                 }
             });            
             Application.Run(new FormMain());
-        }        
+        }   
 
-        private static void RegistMedical()
-        {
-            var reg = Registry.ClassesRoot.OpenSubKey("WebProxy");
-            //声明一个变量
-            if (reg == null)
-            {
-                reg = Registry.ClassesRoot.CreateSubKey("WebProxy");
-                reg.SetValue("URL Protocol", Process.GetCurrentProcess().MainModule.FileName);
-                reg.Close();
-                Registry.ClassesRoot.CreateSubKey("WebProxy\\DefaultIcon").Close();
-                Registry.ClassesRoot.CreateSubKey("WebProxy\\shell").Close();
-                Registry.ClassesRoot.CreateSubKey("WebProxy\\shell\\open").Close();
-                reg = Registry.ClassesRoot.CreateSubKey("WebProxy\\shell\\open\\command");
-                reg.SetValue("", "\""+Process.GetCurrentProcess().MainModule.FileName+"\" \"%1\"");
-                reg.Close();
-            }
-        }
-
-        private static void AutoStart()
-        {            
-            try
-            {
-                RegistryKey local = Registry.LocalMachine;
-                RegistryKey key = local.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
-                if (key == null)
-                {
-                    local.CreateSubKey("SOFTWARE//Microsoft//Windows//CurrentVersion//Run");
-                }
-                key.SetValue("Web-Proxy", Process.GetCurrentProcess().MainModule.FileName);
-                key.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError($"自启动设置失败：{ex.Message}");
-            }
-        }
     }
 }
