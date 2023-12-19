@@ -51,8 +51,7 @@ namespace Web_Proxy
                 //注册成功                   
                 _config.Token = result.Data.ToString();
                 _config.BaseApi = new ClientService().Config;
-                _config.LocalPort = ApplicationUnit.Client.Port;
-                _config.Token = result.Data.ToString();
+                _config.LocalPort = ApplicationUnit.Client.Port;               
                 _config.Version = ApplicationUnit.Client.Version;
                 _config.VersionNo = ApplicationUnit.Client.VersionNo.Value;
                 _config.LocalVersionNo = ApplicationUnit.Client.VersionNo.Value;

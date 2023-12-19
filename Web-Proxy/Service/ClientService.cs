@@ -13,7 +13,7 @@ namespace Web_Proxy.Service
 
         public ClientService(string BaseUrl)
         {
-            this.BaseUrl=BaseUrl;
+            this.BaseUrl = BaseUrl;
         }
 
         public string  Config
