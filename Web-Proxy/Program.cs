@@ -53,11 +53,11 @@ namespace Web_Proxy
         [STAThread]
         static void Main(string[] args)
         {            
-            if (ProcessExist(appName))
-            {
-                Logger.WriteError("应用已启动");
-                return;
-            }
+            //if (ProcessExist(appName))
+            //{
+            //    Logger.WriteError("应用已启动");
+            //    return;
+            //}
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
