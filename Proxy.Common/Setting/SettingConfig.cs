@@ -22,6 +22,13 @@
         /// 客户端ip列表（多网卡有可能是多个ip）
         /// </summary>
         public string Ip { get; set;}
-        
+
+        /// <summary>
+        /// 是否要检测插件（服务器是否注册）
+        /// </summary>
+        public bool IsCheckPlugins { get; set; } = false;
+
+        public string token { get; set; }
+
     }
 }

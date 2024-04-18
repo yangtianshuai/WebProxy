@@ -1,12 +1,14 @@
 ﻿using Proxy.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime;
 
 namespace WebProxy.Plugin
 {
     public class PluginManager : ProxyManager
     {
         private static Config<List<PluginConfig>> _config;
+
         public PluginManager()
         {
             string path = this.BaseDictionary + "plugin.wp";
@@ -61,14 +63,14 @@ namespace WebProxy.Plugin
                     action?.Invoke(config);
                 }
             }
-        }        
+        }
 
         /// <summary>
         /// 反馈动作
         /// </summary>
         /// <param name="list"></param>
         /// <param name="action"></param>
-        public static void Action(Type[] list,Action<IPlugin> action)
+        public static void Action(Type[] list, Action<IPlugin> action)
         {
             var _type = typeof(IPlugin);
             foreach (var item in list)
@@ -95,19 +97,25 @@ namespace WebProxy.Plugin
         {
             string path = "";
             var plugins = _config.Read();
-            foreach (var plugin in plugins)
+
+            if (plugins != null)
             {
-                if (plugin_id == plugin.Plugin.ID)
+                foreach (var plugin in plugins)
                 {
-                    int index = plugin.Path.LastIndexOf('\\');
-                    path = plugin.Path.Substring(0, index);
-                    break;
+                    if (plugin_id == plugin.Plugin.ID)
+                    {
+                        int index = plugin.Path.LastIndexOf('\\');
+                        path = plugin.Path.Substring(0, index);
+                        break;
+                    }
                 }
             }
-            if (path.Length > 0)
+
+            if (!string.IsNullOrEmpty(path))
             {
                 return new PluginSetting(path);
             }
+
             return null;
         }
 
@@ -115,25 +123,34 @@ namespace WebProxy.Plugin
         {
             string path = "";
             var plugins = _config.Read();
-            foreach (var plugin in plugins)
+
+            if (plugins != null)
             {
-                if (plugin_id == plugin.Plugin.ID)
+                foreach (var plugin in plugins)
                 {
-                    int index = plugin.Path.LastIndexOf('\\');
-                    path = plugin.Path.Substring(0, index);
-                    break;
+                    if (plugin_id == plugin.Plugin.ID)
+                    {
+                        int index = plugin.Path.LastIndexOf('\\');
+                        path = plugin.Path.Substring(0, index);
+                        break;
+                    }
                 }
             }
-            if (path.Length > 0)
-            {                      
-                var setting =  new PluginSetting(path);
-                foreach(var config in configs)
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                var setting = new PluginSetting(path);
+
+                foreach (var config in configs)
                 {
                     setting.Set(config.Key, config.Value);
                 }
                 return setting.Save();
             }
+
             return false;
         }
+
+
     }
 }
