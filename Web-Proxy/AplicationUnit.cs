@@ -27,7 +27,12 @@ namespace Web_Proxy
         /// <summary>
         /// 客户端信息
         /// </summary>
-        public static ClientRegisterModel Client { get; private set; } 
+        public static ClientRegisterModel Client { get; private set; }
+
+        /// <summary>
+        /// 是否要检测插件（服务器是否注册）
+        /// </summary>
+        public static bool IsCheckPlugins { get; set; }
 
     }
 }
