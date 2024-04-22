@@ -1,7 +1,10 @@
-﻿namespace Web_Proxy.Models
+﻿using Proxy.Common.Setting;
+
+namespace Web_Proxy.Models
 {
     public class ClientRegisterModel
-    {        
+    { 
+        
         public string Token { get; set; }
         /// <summary>
         /// IP地址
@@ -30,6 +33,19 @@
         /// <summary>
         /// 操作系统
         /// </summary>
-        public string OS { get; set; }        
+        public string OS { get; set; } 
+        
+        public ClientRegisterModel() {
+            SettingManager _manager = new SettingManager();
+            //读取配置文件
+            SettingConfig _config = _manager.Config.Read();
+            if (_config != null)
+            {
+                if (_config.LocalPort>0)
+                {
+                    Port = _config.LocalPort;
+                }
+            }
+        }
     }
 }
