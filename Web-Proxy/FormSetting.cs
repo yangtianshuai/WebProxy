@@ -17,7 +17,7 @@ namespace Web_Proxy
 
         private void FormSetting_Load(object sender, EventArgs e)
         {
-            this.tbPort.Text = ApplicationUnit.Client.Port.ToString();
+            //this.tbPort.Text = ApplicationUnit.Client.Port.ToString();
             //加载配置
             LoadConfig();
         }
@@ -33,6 +33,7 @@ namespace Web_Proxy
                 this.tbApi.Text = _config.BaseApi;
                 this.labelVersion.Text = ApplicationUnit.Client.Version;
                 this.labelVersionNo.Text = ApplicationUnit.Client.VersionNo.ToString();
+                this.tbPort.Text = _config.LocalPort.ToString();
             }
         }
 
@@ -50,6 +51,7 @@ namespace Web_Proxy
                 ApplicationUnit.Client.Port = port;
             }
             _config.LocalPort = port;
+
             if (_manager.Config.Write(_config))
             {
                 MessageBox.Show("保存成功");

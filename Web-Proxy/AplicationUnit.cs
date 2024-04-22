@@ -1,4 +1,5 @@
 ﻿using Proxy.Common;
+using Proxy.Common.Setting;
 using System;
 using System.Diagnostics;
 using System.HttpProxy;
@@ -8,15 +9,18 @@ namespace Web_Proxy
 {
     public class ApplicationUnit
     {
+        
         static ApplicationUnit()
         {
             Client = new ClientRegisterModel();
             Client.IP = SystemHelper.GetAllIP();
             Client.Mac = SystemHelper.GetComputerMac();
             Client.OS = Environment.OSVersion.VersionString;
-            Client.Port = 8655;         
+            //Client.Port = 8655;         
             Client.StartPath = Process.GetCurrentProcess().MainModule.FileName;
-            Client.Version = Process.GetCurrentProcess().MainModule.FileVersionInfo.FileVersion;            
+            Client.Version = Process.GetCurrentProcess().MainModule.FileVersionInfo.FileVersion;
+
+            
         }
         public static HttpServer Server { get; set; }
 
