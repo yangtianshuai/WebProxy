@@ -71,8 +71,9 @@ namespace Web_Proxy
             {
                 ApplicationUnit.Server = new HttpServer();
 
+                int? port = ApplicationUnit.Client.Port;
                 //开启Web服务
-                ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);                
+                ApplicationUnit.Server.Run(port);                
 
                 //开启WebSocket
                 WebSocket.Current.Start(ApplicationUnit.Client.Port + 1);
