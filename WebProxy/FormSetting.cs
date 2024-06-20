@@ -37,8 +37,42 @@ namespace Web_Proxy
             }
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 保存配置
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //private void btnSave_Click(object sender, EventArgs e)
+        //{
+        //    if (_config == null)
+        //    {
+        //        _config = new SettingConfig();
+        //    }
+        //    _config.BaseApi = this.tbApi.Text.Trim();
+
+        //    int port = ApplicationUnit.Client.Port;
+        //    if (int.TryParse(this.tbPort.Text.Trim(), out port))
+        //    {
+        //        ApplicationUnit.Client.Port = port;
+        //    }
+        //    _config.LocalPort = port;
+
+        //    if (_manager.Config.Write(_config))
+        //    {
+        //        MessageBox.Show("保存成功");
+        //        //重启Web服务
+        //        ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);
+        //    }
+        //}
+
+        /// <summary>
+        /// 注册按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btRegister_Click(object sender, EventArgs e)
         {
+           //1，参数验证
             if (_config == null)
             {
                 _config = new SettingConfig();
@@ -46,29 +80,24 @@ namespace Web_Proxy
             _config.BaseApi = this.tbApi.Text.Trim();
 
             int port = ApplicationUnit.Client.Port;
-            if (int.TryParse(this.tbPort.Text.Trim(),out port))
-            {                
+            if (int.TryParse(this.tbPort.Text.Trim(), out port))
+            {
                 ApplicationUnit.Client.Port = port;
             }
             _config.LocalPort = port;
 
-            if (_manager.Config.Write(_config))
-            {
-                MessageBox.Show("保存成功");
-                //重启Web服务
-                ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);
-            }
-        }
-
-        private void btRegister_Click(object sender, EventArgs e)
-        {
+            //注册客户端或修改客户端注册
             var result = new ClientService(this.tbApi.Text.Trim()).Register(ApplicationUnit.Client);           
             if (result.IsSuccess())
             {
                 //注册成功
                 _config.Token = result.Data.ToString();
                 this.labelToken.Text = _config.Token;
-                _manager.Config.Write(_config);
+                if (_manager.Config.Write(_config))
+                {
+                    //重启Web服务
+                    ApplicationUnit.Server.Run(ApplicationUnit.Client.Port);
+                }
                 MessageBox.Show("注册成功");
             }
             else

@@ -11,7 +11,7 @@ namespace Web_Proxy
 {
     static class Program
     {
-        private static string appName = "Web-Proxy";
+        private static string appName = "WebProxy";
 
         #region --检查是否只运行一个实例 
         /// <summary>

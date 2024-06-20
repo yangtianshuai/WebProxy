@@ -1,5 +1,8 @@
 ﻿namespace Proxy.Common.Setting
 {
+    /// <summary>
+    /// 针对客户端webProxy配置
+    /// </summary>
     public class SettingConfig
     {
         public string BaseApi { get; set; }
@@ -7,6 +10,9 @@
         /// 本地端口
         /// </summary>
         public int LocalPort { get; set; }
+        /// <summary>
+        /// 客户端token
+        /// </summary>
         public string Token { get; set; }
         public string Version { get; set; }
         public int VersionNo { get; set; }
@@ -27,8 +33,6 @@
         /// 是否要检测插件（服务器是否注册）
         /// </summary>
         public bool IsCheckPlugins { get; set; } = false;
-
-        public string token { get; set; }
 
     }
 }

@@ -33,26 +33,15 @@ namespace Web_Proxy
                 _config = new SettingConfig();
             }
 
-            ApplicationUnit.Client.Token = _config?.token;
+            ApplicationUnit.Client.Token = _config?.Token;
             ApplicationUnit.IsCheckPlugins = _config.IsCheckPlugins;
 
-            //检测客户端
-            // if (FireWallHelper.GetRule("Web-Proxy", "TCP") == null)
-            //{
-            //加入防火墙入栈规则
-            // FireWallHelper.AddRule("Web-Proxy", ApplicationUnit.Client.Port, "TCP");
-
             //检测客户端是否注册
-            if (RegistryUtility.ExistConfig())
+            //注册表未注册
+            if (!RegistryUtility.ExistConfig())
             {
                 //保存本地端口配置
                 RegistryUtility.RegistryPort(ApplicationUnit.Client.Port);
-
-                // if (_config?.Ip != ApplicationUnit.Client.IP)
-                //{
-                //不同计算机拷贝
-                //  ApplicationUnit.Client.Token = null;
-                //客户端插件是否需要自动注册
 
                 //本地配置里的ip
                 string[] config_ip = { };
@@ -60,8 +49,6 @@ namespace Web_Proxy
                 {
                     config_ip = _config.Ip.Split(',');
                 }
-
-                Logger.WriteTrace("客户端正在加入防火墙入栈规则");
 
                 //不同计算机拷贝(或本机重装系统且更换ip)
                 if (commonElements(config_ip, ApplicationUnit.Client.IP))
@@ -101,7 +88,7 @@ namespace Web_Proxy
             if (result.IsSuccess())
             {
                 //注册成功                   
-                _config.token = result.Data.ToString();
+                _config.Token = result.Data.ToString();
                 ApplicationUnit.Client.Token = result.Data.ToString();
                 _config.BaseApi = new ClientService().Config;
                 _config.LocalPort = ApplicationUnit.Client.Port;

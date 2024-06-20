@@ -87,6 +87,7 @@ namespace Web_Proxy.Api
                 Directory.Delete(updateDir, true);
             }
             Directory.CreateDirectory(updateDir);
+
             //执行文件
             string excPath = Process.GetCurrentProcess().MainModule.FileName;
             int lastIndex = excPath.LastIndexOf('\\') + 1;

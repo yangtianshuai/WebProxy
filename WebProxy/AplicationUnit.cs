@@ -18,9 +18,7 @@ namespace Web_Proxy
             Client.OS = Environment.OSVersion.VersionString;
             //Client.Port = 8655;         
             Client.StartPath = Process.GetCurrentProcess().MainModule.FileName;
-            Client.Version = Process.GetCurrentProcess().MainModule.FileVersionInfo.FileVersion;
-
-            
+            Client.Version = Process.GetCurrentProcess().MainModule.FileVersionInfo.FileVersion;            
         }
         public static HttpServer Server { get; set; }
 

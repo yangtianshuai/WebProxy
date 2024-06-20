@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("插件客户端64位")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("YTS")]
-[assembly: AssemblyProduct("Web-Proxy")]
+[assembly: AssemblyProduct("WebProxy")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

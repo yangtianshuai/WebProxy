@@ -35,6 +35,7 @@ namespace Web_Proxy.Api
 
             //获取插件文件信息
             var url = baseUrl + "/api/plugin/GetFiles";
+            
             var res = JsonConvert.DeserializeObject<ResponseResult2>(new HttpHelper().Get(url + "?pluginId=" + pluginId));
             if (!res.IsSuccess())
             {
@@ -58,16 +59,22 @@ namespace Web_Proxy.Api
                 var _res = JsonConvert.DeserializeObject<ResponseResult2>(new HttpHelper().Get(_url + "?file_id=" + item.file_id));
                 if (!_res.IsSuccess())
                 {
-                    if (_res == null)
+                    if(item.main_flag=="*")
                     {
-                        result.Message = "文件下载失败!";
-                    }
-                    else
-                    {
-                        result.Message = _res.Message;
-                    }
+                        if (_res == null)
+                        {
+                            result.Message = "文件下载失败!";
+                        }
+                        else
+                        {
+                            result.Message = _res.Message;
+                        }
 
-                    return new JsonResult(result);
+                        return new JsonResult(result);
+                    }else
+                    {
+                        continue;
+                    }                    
                 }
 
                 //从服务器拿到插件
@@ -220,10 +227,10 @@ namespace Web_Proxy.Api
                 var args = "";
                 args += " " + Environment.CurrentDirectory + @"\update_plugin.wp";
                 args += " " + Environment.CurrentDirectory + @"\plugin.wp";
-                args += " " + Environment.CurrentDirectory + @"\Web-Proxy.exe";
+                args += " " + Environment.CurrentDirectory + @"\WebProxy.exe";
                 args += " " + setting.BaseApi;
                 args += " " + clientID;
-                Process.Start(updaterPath, args);//启动指定路径的外部程序，并将参数传递给它。
+                Process.Start(updaterPath, args);//启动指定路径的外部程序，并将参数传递给它。               
             }
             else
             {
@@ -240,7 +247,8 @@ namespace Web_Proxy.Api
                 {
                     Directory.CreateDirectory(localfile);
                 }
-                string strbase64 = file.base64Str.Trim().Substring(file.base64Str.IndexOf(",") + 1);   //将‘，’以前的多余字符串删除
+                //将‘，’以前的多余字符串删除
+                string strbase64 = file.base64Str.Trim().Substring(file.base64Str.IndexOf(",") + 1);   
                 MemoryStream stream = new MemoryStream(Convert.FromBase64String(strbase64));
                 FileStream fs = new FileStream(localfile + "\\" + file.file_name, FileMode.OpenOrCreate, FileAccess.Write);
                 byte[] b = stream.ToArray();
@@ -248,7 +256,7 @@ namespace Web_Proxy.Api
                 fs.Close();
                 result = true;
             }
-            catch (Exception e)
+            catch
             {
                 result = false;
             }
@@ -276,17 +284,17 @@ namespace Web_Proxy.Api
                 }
 
                 //1,移除插件文件夹
-                try
-                {
-                    var delete_file = config.Path.Substring(0, config.Path.LastIndexOf("\\"));
-                    Directory.Delete(delete_file, true);
-                }
-                catch (Exception e)
-                {
-                    Logger.WriteError($"移除插件文件夹失败:{e.Message}");
-                    result.Message = "移除插件文件夹失败";
-                    return new JsonResult(result);
-                }
+                //try
+                //{
+                //    var delete_file = config.Path.Substring(0, config.Path.LastIndexOf("\\"));
+                //    Directory.Delete(delete_file, true);
+                //}
+                //catch (Exception e)
+                //{
+                //    Logger.WriteError($"移除插件文件夹失败:{e.Message}");
+                //    result.Message = "移除插件文件夹失败";
+                //    return new JsonResult(result);
+                //}
 
                 //将插件从插件列表文件中移除
                 plugins.Remove(config);

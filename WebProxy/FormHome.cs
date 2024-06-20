@@ -35,6 +35,10 @@ namespace Web_Proxy
             _config = _manager.Config.Read();
         }
 
+        /// <summary>
+        /// 重新加载插件
+        /// </summary>
+        /// <param name="flag"></param>
         private void LoadPlugin(bool flag = false)
         {
             if (flag)
@@ -51,11 +55,13 @@ namespace Web_Proxy
 
             this.panelPlugin.Controls.Clear();
 
+            //读取插件config
             plugins = new PluginManager().Config.Read();
             if (plugins == null)
             {
                 return;
             }
+
             foreach (var plugin in plugins)
             {
                 var uc = new UCPlugin(plugin);
@@ -79,8 +85,6 @@ namespace Web_Proxy
         private void pbSetting_Click(object sender, EventArgs e)
         {
             FormSetting setting = new FormSetting();
-            //setting.FormClosedEvent += new FormBase.Form_Closed(SettingClose);
-            //this.Visible = false;
             setting.Show(this);
         }
 
@@ -152,44 +156,51 @@ namespace Web_Proxy
                 plugin.From = PluginFrom.Local;
                 plugin.Name = file.ProductName;
                 plugin.Discription = file.FileDescription;
-                
-                var assembly = Assembly.LoadFrom(plugin.Path);
-                
-                var guid_attr = Attribute.GetCustomAttribute(Assembly.LoadFile(plugin.Path), typeof(GuidAttribute));
-                string key = ((GuidAttribute)guid_attr).Value;
 
-                //插件需要增加Key扩展
                 plugin.Plugin = new PluginModel
                 {
-                    ID = Guid.NewGuid().ToString("N"),
-                    Version = file.FileVersion
+                    //获取插件版本
+                    Version = (Path.GetFileName(Path.GetDirectoryName(plugin.Path))).Split('_')[1]
                 };
 
+                //根据GuidAttribute获取一个guid字符串
+                var assembly = Assembly.LoadFrom(plugin.Path);
+                var guid_attr = Attribute.GetCustomAttribute(Assembly.LoadFile(plugin.Path), typeof(GuidAttribute));
+                string key = ((GuidAttribute)guid_attr).Value;             
+
+                //插件需要增加Key扩展
                 plugin.Plugin.Key = key;
+
                 //服务器注册,注册后返回plutin_id
                 if (_config != null)
                 {
                     try
                     {
                         string url = _config.BaseApi + "/api/client/GetClientId";
-                        var res = JsonConvert.DeserializeObject<ResponseResult2>(new HttpHelper().Get(url + "?plugin_key=" + key + "&client_token=" + _config.Token));
+                        var res = JsonConvert.DeserializeObject<ResponseResult2>(new HttpHelper().Get(url + "?plugin_key=" + key + "&client_token=" + _config.Token + "&version=" + plugin.Plugin.Version));
                         if (res.IsSuccess())
                         {
                             plugin.Plugin.ID = res.Data.ToString();
+                            plugins.Add(plugin);
+                            //保存配置
+                            if (new PluginManager().Config.Write(plugins))
+                            {
+                                this.LoadPlugin(true);
+                            }
+                        }
+                        else
+                        {
+                            Logger.WriteError($"远程注册插件：plugin_key={key}：{JsonConvert.SerializeObject(res)}");
                         }
                     }
                     catch (Exception ex)
                     {
                         Logger.WriteError("远程注册插件失败：" + ex.Message);
-                    }
-                }
-                
-                plugins.Add(plugin);
-                //保存配置
-                if(new PluginManager().Config.Write(plugins))
-                {          
-                    //保存成功后，修改服务器client_plugin状态，告知服务器已经安装成功
-                    this.LoadPlugin(true);
+                    }                   
+                }else
+                {
+                    Logger.WriteError("请先注册客户端");
+                    return;
                 }
             }
         }
@@ -211,8 +222,9 @@ namespace Web_Proxy
                     string url = _config.BaseApi + "/api/client/DeleteClientPlugin";
                     var res = JsonConvert.DeserializeObject<ResponseResult2>(new HttpHelper().Get(url + "?plugin_id=" + config.Plugin.ID + "&client_token=" + _config.Token));
                 }
-                catch (Exception exc)
+                catch (Exception ex)
                 {
+                    
                 }
                 this.LoadPlugin(true);
             }

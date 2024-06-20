@@ -131,7 +131,7 @@ namespace Web_Proxy
             this.labelTitle.Name = "labelTitle";
             this.labelTitle.Size = new System.Drawing.Size(83, 20);
             this.labelTitle.TabIndex = 0;
-            this.labelTitle.Text = "Web-Proxy";
+            this.labelTitle.Text = "WebProxy";
             // 
             // panelMain
             // 

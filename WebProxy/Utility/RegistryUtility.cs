@@ -42,7 +42,10 @@ namespace Web_Proxy
                 return false;
             }
         }
-
+        /// <summary>
+        /// 注册表设置port键值
+        /// </summary>
+        /// <param name="port"></param>
         public static void RegistryPort(int port)
         {
             try
@@ -73,7 +76,7 @@ namespace Web_Proxy
                 {
                     key = local.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
                 }
-                key.SetValue("Web-Proxy", Process.GetCurrentProcess().MainModule.FileName);
+                key.SetValue("WebProxy", Process.GetCurrentProcess().MainModule.FileName);
                 key.Close();
             }
             catch (Exception ex)
