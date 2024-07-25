@@ -96,13 +96,13 @@ namespace Web_Proxy
                 }
             }
 
-            //注册或修改客户端
+            // 注册或修改客户端（如果已经注册，从服务器获取客户端配置）
             var result = new ClientService().Register(ApplicationUnit.Client);
             if (result.IsSuccess())
             {
                 //注册成功                   
                 _config.token = result.Data.ToString();
-                ApplicationUnit.Client.Token = result.Data.ToString();
+                ApplicationUnit.Client.Token = _config.token;
                 _config.BaseApi = new ClientService().Config;
                 _config.LocalPort = ApplicationUnit.Client.Port;
                 _config.Version = ApplicationUnit.Client.Version;

@@ -1,4 +1,5 @@
 ﻿using Proxy.Common;
+using Proxy.Common.Setting;
 using System;
 using System.Diagnostics;
 using System.HttpProxy;
@@ -15,7 +16,16 @@ namespace Web_Proxy
         }
 
         public void Request(HttpClient client)
-        {            
+        {
+            
+            //读取配置文件
+            var _config = new SettingManager().Config.Read();
+
+            // 访问限制
+            var ip = client.GetIP();
+            //访问限制
+            client.Request.IsValid = (ip == "127.0.0.1") || (_config.WhiteList != null && _config.WhiteList.Contains(ip));
+            // 超时监听
             watch = new Stopwatch();
             watch.Start();
         }

@@ -1,4 +1,6 @@
-﻿namespace Proxy.Common.Setting
+﻿using System.Collections.Generic;
+
+namespace Proxy.Common.Setting
 {
     public class SettingConfig
     {
@@ -29,6 +31,10 @@
         public bool IsCheckPlugins { get; set; } = false;
 
         public string token { get; set; }
+        /// <summary>
+        /// IP白名单
+        /// </summary>
+        public List<string> WhiteList { get; set; }
 
     }
 }
