@@ -14,6 +14,7 @@ namespace Web_Proxy
         {
             Client = new ClientRegisterModel();
             Client.IP = SystemHelper.GetAllIP();
+            Client.name=Environment.UserName;
             Client.Mac = SystemHelper.GetComputerMac();
             Client.OS = Environment.OSVersion.VersionString;
             //Client.Port = 8655;         

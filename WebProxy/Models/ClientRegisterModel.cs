@@ -6,6 +6,7 @@ namespace Web_Proxy.Models
     { 
         
         public string Token { get; set; }
+        public string name { get; set; }
         /// <summary>
         /// IP地址
         /// </summary>

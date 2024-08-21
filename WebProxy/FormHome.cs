@@ -8,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 using Web_Proxy.UC;
 using WebProxy.Plugin;
@@ -154,54 +155,78 @@ namespace Web_Proxy
 
                 var file = FileVersionInfo.GetVersionInfo(plugin.Path);
                 plugin.From = PluginFrom.Local;
-                plugin.Name = file.ProductName;
+                //plugin.Name = file.ProductName;
+                plugin.Name = file.OriginalFilename;
                 plugin.Discription = file.FileDescription;
+
+                //获取插件版本
+                var version = Path.GetFileName(Path.GetDirectoryName(plugin.Path));
+                if(version.Contains("_"))
+                {
+                    version = version.Split('_')[1];
+                }
+                else
+                {
+                    version = string.Empty;
+                }
 
                 plugin.Plugin = new PluginModel
                 {
-                    //获取插件版本
-                    Version = (Path.GetFileName(Path.GetDirectoryName(plugin.Path))).Split('_')[1]
+                    Version =version
                 };
 
-                //根据GuidAttribute获取一个guid字符串
-                var assembly = Assembly.LoadFrom(plugin.Path);
-                var guid_attr = Attribute.GetCustomAttribute(Assembly.LoadFile(plugin.Path), typeof(GuidAttribute));
-                string key = ((GuidAttribute)guid_attr).Value;             
-
-                //插件需要增加Key扩展
-                plugin.Plugin.Key = key;
-
-                //服务器注册,注册后返回plutin_id
-                if (_config != null)
+                var key = string.Empty;
+                try
                 {
-                    try
+                    //根据GuidAttribute获取一个guid字符串
+                    var assembly = Assembly.LoadFrom(plugin.Path);
+                    var guid_attr = Attribute.GetCustomAttribute(Assembly.LoadFile(plugin.Path), typeof(GuidAttribute));
+                    key = ((GuidAttribute)guid_attr).Value;
+                }
+                catch(Exception ex)
+                {
+                    Logger.WriteError($"获取插件key失败：{ex.Message}");
+                }
+                        
+                if(!string.IsNullOrEmpty(key))
+                {
+                    //插件需要增加Key扩展
+                    plugin.Plugin.Key = key;
+
+                    //服务器注册,注册后返回plutin_id
+                    if (_config != null)
                     {
-                        string url = _config.BaseApi + "/api/client/GetClientId";
-                        var res = JsonConvert.DeserializeObject<ResponseResult2>(new HttpHelper().Get(url + "?plugin_key=" + key + "&client_token=" + _config.Token + "&version=" + plugin.Plugin.Version));
-                        if (res.IsSuccess())
+                        try
                         {
-                            plugin.Plugin.ID = res.Data.ToString();
-                            plugins.Add(plugin);
-                            //保存配置
-                            if (new PluginManager().Config.Write(plugins))
+                            string url = _config.BaseApi + "/api/client/GetClientId";
+                            var res = JsonConvert.DeserializeObject<ResponseResult2>(new HttpHelper().Get(url + "?plugin_key=" + key + "&client_token=" + _config.Token + "&version=" + plugin.Plugin.Version));
+                            if (res.IsSuccess())
                             {
-                                this.LoadPlugin(true);
+                                plugin.Plugin.ID = res.Data.ToString();
+                                plugins.Add(plugin);
+                                //保存配置
+                                if (new PluginManager().Config.Write(plugins))
+                                {
+                                    this.LoadPlugin(true);
+                                }
+                            }
+                            else
+                            {
+                                Logger.WriteError($"远程注册插件：plugin_key={key}：{JsonConvert.SerializeObject(res)}");
                             }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            Logger.WriteError($"远程注册插件：plugin_key={key}：{JsonConvert.SerializeObject(res)}");
+                            Logger.WriteError("远程注册插件失败：" + ex.Message);
                         }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Logger.WriteError("远程注册插件失败：" + ex.Message);
-                    }                   
-                }else
-                {
-                    Logger.WriteError("请先注册客户端");
-                    return;
+                        Logger.WriteError("请先注册客户端");
+                        return;
+                    }
                 }
+               
             }
         }
 

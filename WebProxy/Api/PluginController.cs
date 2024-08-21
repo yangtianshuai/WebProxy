@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.HttpProxy;
 using System.IO;
+using System.Runtime.Remoting.Contexts;
+using System.Security.Policy;
+using System.Web;
 using System.Windows.Forms;
 using Web_Proxy.Models;
 using WebProxy.Plugin;
@@ -22,18 +25,21 @@ namespace Web_Proxy.Api
         /// 下载插件
         /// </summary>
         /// <param name="pluginId">插件ID</param>
+        /// <param name="baseUrl">运维平台</param>
+        /// <param name="token">授权token，携带此token有权限访问所有api</param>
         /// <returns></returns>
         [Route("download")]
-        public ActionResult Download(string pluginId, string baseUrl)
+        public ActionResult Download(string pluginId, string baseUrl,string token)
         {
             var result = new ResponseResult2();
+
             if (string.IsNullOrEmpty(pluginId))
             {
                 result.Message = "插件id不能为空!";
                 return new JsonResult(result);
             }
 
-            //获取插件文件信息
+            //1，获取插件文件信息
             var url = baseUrl + "/api/plugin/GetFiles";
             
             var res = JsonConvert.DeserializeObject<ResponseResult2>(new HttpHelper().Get(url + "?pluginId=" + pluginId));
@@ -44,7 +50,8 @@ namespace Web_Proxy.Api
             }
             var plugins = JsonConvert.DeserializeObject<List<PluginFileView>>(res.Data.ToString());
 
-            //客户端插件存放路径
+            
+            //2，客户端插件存放路径
             string dir = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString("N");
 
             //从服务器下载插件到客户端是否成功
@@ -55,8 +62,12 @@ namespace Web_Proxy.Api
             foreach (var item in plugins)
             {
                 //从服务器读取插件
-                var _url = baseUrl + "/api/plugin/DownloadFile";
-                var _res = JsonConvert.DeserializeObject<ResponseResult2>(new HttpHelper().Get(_url + "?file_id=" + item.file_id));
+                var _url = baseUrl + "/storage/download";
+                var _res = JsonConvert.DeserializeObject<ResponseResult2>(new HttpHelper().Get(_url + "?id=" + item.file_id + "&type=2", request =>
+                {
+                    request.Headers.Add("devops_token", token);
+                }));
+
                 if (!_res.IsSuccess())
                 {
                     if(item.main_flag=="*")
@@ -78,10 +89,14 @@ namespace Web_Proxy.Api
                 }
 
                 //从服务器拿到插件
-                var file = JsonConvert.DeserializeObject<FileView>(_res.Data.ToString());
+                var file = new FileView
+                {
+                    file_name = item.file_name,
+                    base64Str = _res.Data.ToString()
+                };
 
                 //将服务器拿到的插件下载到本地磁盘
-                if (!DownloadFile(file, dir))
+                if (!DownloadFile1(file, dir))
                 {
                     flag = false;
                 }
@@ -146,6 +161,7 @@ namespace Web_Proxy.Api
                         {
                             setflag = new Config<Dictionary<string, string>>(setPath).Write(JsonConvert.DeserializeObject<Dictionary<string, string>>(setting));
                         }
+
                         if (!setflag)
                         {
                             result.Message = "默认配置写入失败";
@@ -261,6 +277,49 @@ namespace Web_Proxy.Api
                 result = false;
             }
             return result;
+        }
+
+        private bool DownloadFile1(FileView file, string localfile)
+        {
+            var result = false;
+            try
+            {
+                if (!Directory.Exists(localfile))
+                {
+                    Directory.CreateDirectory(localfile);
+                }
+                
+                MemoryStream stream = new MemoryStream(Convert.FromBase64String(file.base64Str));
+
+                //获取file_name里最后一个/后面的内容
+                var fileName = GetLastPartAfterSlash(file.file_name);
+
+                FileStream fs = new FileStream(localfile + "\\" + fileName, FileMode.OpenOrCreate, FileAccess.Write);
+                byte[] b = stream.ToArray();
+                fs.Write(b, 0, b.Length);
+                fs.Close();
+                result = true;
+            }
+            catch(Exception ex)
+            {
+                result = false;
+            }
+            return result;
+        }
+
+        private static string GetLastPartAfterSlash(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return string.Empty;
+
+            int lastSlashIndex = input.LastIndexOf('/');
+
+            // 如果没有找到斜杠或者斜杠是字符串的第一个字符，则返回原字符串
+            if (lastSlashIndex <= 0)
+                return input;
+
+            // 返回斜杠后面的子字符串
+            return input.Substring(lastSlashIndex + 1);
         }
         /// <summary>
         /// 卸载插件
